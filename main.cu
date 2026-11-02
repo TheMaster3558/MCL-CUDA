@@ -191,23 +191,20 @@ static BenchResult runCpuBenchmark(std::size_t nParticles, int warmupIters,
 
 int main() {
     const std::string cpuName = getCpuName();
-    int device = 0;
-    CUDA_CHECK(cudaGetDevice(&device));
-
-    cudaDeviceProp properties;
-    CUDA_CHECK(cudaGetDeviceProperties(&properties, device));
-
     int deviceCount = 0;
     CUDA_CHECK(cudaGetDeviceCount(&deviceCount));
 
     printf("CPU: %s\n", cpuName.c_str());
-    printf("Device %d of %d: %s (SM %d.%d, %d SMs, %.1f GB)\n", device,
-           deviceCount, properties.name, properties.major, properties.minor,
-           properties.multiProcessorCount,
-           properties.totalGlobalMem / (1024.0 * 1024.0 * 1024.0));
-    printf("%10s %12s %12s %12s %12s %12s %12s\n", "particles",
-           "GPU ms", "GPU M/s", "GPU RMSE", "CPU ms", "CPU M/s",
-           "CPU RMSE");
+    for (int device = 0; device < deviceCount; ++device) {
+        cudaDeviceProp properties;
+        CUDA_CHECK(cudaGetDeviceProperties(&properties, device));
+        printf("GPU %d of %d: %s (SM %d.%d, %d SMs, %.1f GB)\n", device,
+               deviceCount, properties.name, properties.major,
+               properties.minor, properties.multiProcessorCount,
+               properties.totalGlobalMem / (1024.0 * 1024.0 * 1024.0));
+    }
+    printf("%10s %-18s %12s %12s %12s\n", "particles", "device",
+           "ms/iter", "M particles/s", "RMSE");
 
     const std::size_t particleCounts[] = {
         1u << 10, 1u << 12, 1u << 14, 1u << 16, 1u << 18, 1u << 20,
@@ -215,16 +212,6 @@ int main() {
     const std::size_t bytesPerParticle = 80;
     const std::size_t maxCpuParticles = 1u << 20;
     for (std::size_t n : particleCounts) {
-        std::size_t freeBytes = 0;
-        std::size_t totalBytes = 0;
-        CUDA_CHECK(cudaMemGetInfo(&freeBytes, &totalBytes));
-
-        if (n * bytesPerParticle > freeBytes) {
-            printf("%12zu   skipped (needs ~%.1f GB, %.1f GB free)\n", n,
-                   n * bytesPerParticle / 1e9, freeBytes / 1e9);
-            continue;
-        }
-
         int warmupIters = 20;
         int timedIters = 200;
         if (n >= (1u << 22)) {
@@ -236,22 +223,37 @@ int main() {
             timedIters = 20;
         }
 
-        BenchResult gpuResult = runBenchmark(n, warmupIters, timedIters);
-        double gpuThroughput = (n / 1e6) / (gpuResult.msPerIter / 1e3);
+        for (int device = 0; device < deviceCount; ++device) {
+            CUDA_CHECK(cudaSetDevice(device));
 
+            std::size_t freeBytes = 0;
+            std::size_t totalBytes = 0;
+            CUDA_CHECK(cudaMemGetInfo(&freeBytes, &totalBytes));
+            if (n * bytesPerParticle > freeBytes) {
+                printf("%10zu GPU %d skipped (needs ~%.1f GB, %.1f GB free)\n",
+                       n, device, n * bytesPerParticle / 1e9,
+                       freeBytes / 1e9);
+                continue;
+            }
+
+            BenchResult result = runBenchmark(n, warmupIters, timedIters);
+            double throughput = (n / 1e6) / (result.msPerIter / 1e3);
+            printf("%10zu GPU %d %12.4f %12.2f %12.4f\n", n, device,
+                   result.msPerIter, throughput, result.rmse);
+        }
+
+        // Run the CPU benchmark after all GPUs, on the same thread.
         if (n <= maxCpuParticles) {
             constexpr int cpuWarmupIters = 3;
             constexpr int cpuTimedIters = 30;
-            BenchResult cpuResult = runCpuBenchmark(
+            BenchResult result = runCpuBenchmark(
                 n, cpuWarmupIters, cpuTimedIters);
-            double cpuThroughput = (n / 1e6) / (cpuResult.msPerIter / 1e3);
-            printf("%10zu %12.4f %12.2f %12.4f %12.4f %12.2f %12.4f\n", n,
-                   gpuResult.msPerIter, gpuThroughput, gpuResult.rmse,
-                   cpuResult.msPerIter, cpuThroughput, cpuResult.rmse);
+            double throughput = (n / 1e6) / (result.msPerIter / 1e3);
+            printf("%10zu %-18s %12.4f %12.2f %12.4f\n", n, "CPU",
+                   result.msPerIter, throughput, result.rmse);
         } else {
-            printf("%10zu %12.4f %12.2f %12.4f %12s %12s %12s\n", n,
-                   gpuResult.msPerIter, gpuThroughput, gpuResult.rmse,
-                   "skipped", "skipped", "skipped");
+            printf("%10zu %-18s %12s %12s %12s\n", n, "CPU", "skipped",
+                   "skipped", "skipped");
         }
     }
 
