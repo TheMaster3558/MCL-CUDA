@@ -6,8 +6,16 @@
 #include <cmath>
 #include <cstdio>
 #include <cstdint>
+#include <cstring>
 #include <random>
+#include <string>
 #include <vector>
+
+#if defined(_MSC_VER)
+#include <intrin.h>
+#elif defined(__GNUC__) || defined(__clang__)
+#include <cpuid.h>
+#endif
 
 struct RangeSensor {
     float2 beacon;
@@ -31,6 +39,38 @@ struct BenchResult {
     double msPerIter;
     double rmse;
 };
+
+static std::string getCpuName() {
+    char brand[49] = {};
+
+#if defined(_MSC_VER)
+    int registers[4] = {};
+    __cpuid(registers, 0x80000000);
+    if (static_cast<unsigned int>(registers[0]) >= 0x80000004) {
+        for (int leaf = 0; leaf < 3; ++leaf) {
+            __cpuid(registers, 0x80000002 + leaf);
+            std::memcpy(brand + leaf * 16, registers, 16);
+        }
+    }
+#elif defined(__GNUC__) || defined(__clang__)
+    unsigned int eax, ebx, ecx, edx;
+    if (__get_cpuid_max(0x80000000, nullptr) >= 0x80000004) {
+        for (unsigned int leaf = 0; leaf < 3; ++leaf) {
+            __get_cpuid(0x80000002 + leaf, &eax, &ebx, &ecx, &edx);
+            unsigned int registers[] = {eax, ebx, ecx, edx};
+            std::memcpy(brand + leaf * 16, registers, 16);
+        }
+    }
+#endif
+
+    std::string name(brand);
+    const auto first = name.find_first_not_of(' ');
+    const auto last = name.find_last_not_of(' ');
+    if (first == std::string::npos) {
+        return "Unknown CPU";
+    }
+    return name.substr(first, last - first + 1);
+}
 
 static BenchResult runBenchmark(std::size_t nParticles, int warmupIters,
                                 int timedIters) {
@@ -150,6 +190,7 @@ static BenchResult runCpuBenchmark(std::size_t nParticles, int warmupIters,
 }
 
 int main() {
+    const std::string cpuName = getCpuName();
     int device = 0;
     CUDA_CHECK(cudaGetDevice(&device));
 
@@ -159,6 +200,7 @@ int main() {
     int deviceCount = 0;
     CUDA_CHECK(cudaGetDeviceCount(&deviceCount));
 
+    printf("CPU: %s\n", cpuName.c_str());
     printf("Device %d of %d: %s (SM %d.%d, %d SMs, %.1f GB)\n", device,
            deviceCount, properties.name, properties.major, properties.minor,
            properties.multiProcessorCount,
