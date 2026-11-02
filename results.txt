@@ -1,0 +1,23 @@
+ particles device                  ms/iter M particles/s         RMSE
+GPU 0 of 1: NVIDIA GeForce RTX 4050 Laptop GPU (SM 8.9, 20 SMs, 6.0 GB)
+      1024 GPU 0                    0.1424         7.19       0.0657
+      4096 GPU 0                    0.1436        28.53       0.0651
+     16384 GPU 0                    0.1779        92.07       0.0651
+     65536 GPU 0                    0.2326       281.75       0.0654
+    262144 GPU 0                    0.5143       509.67       0.0653
+   1048576 GPU 0                    1.4922       702.73       0.0653
+   4194304 GPU 0                    6.4407       651.22       0.0617
+   8388608 GPU 0                   13.1418       638.31       0.0618
+  16777216 GPU 0                   26.3561       636.56       0.0618
+  33554432 GPU 0                   54.4175       616.61       0.0814
+CPU: Intel(R) Core(TM) Ultra 7 155H
+      1024 CPU                      0.1598         6.41       0.0635
+      4096 CPU                      0.6453         6.35       0.0714
+     16384 CPU                      2.6644         6.15       0.0703
+     65536 CPU                     10.5945         6.19       0.0704
+    262144 CPU                     41.6234         6.30       0.0712
+   1048576 CPU                    167.9116         6.24       0.0716
+   4194304 CPU                     skipped      skipped      skipped
+   8388608 CPU                     skipped      skipped      skipped
+  16777216 CPU                     skipped      skipped      skipped
+  33554432 CPU                     skipped      skipped      skipped
