@@ -1,4 +1,4 @@
- particles device                  ms/iter M particles/s         RMSE
+ particles device                  ms/iter M particles/s      RMSE
 GPU 0 of 1: NVIDIA GeForce RTX 4050 Laptop GPU (SM 8.9, 20 SMs, 6.0 GB)
       1024 GPU 0                    0.1424         7.19       0.0657
       4096 GPU 0                    0.1436        28.53       0.0651
