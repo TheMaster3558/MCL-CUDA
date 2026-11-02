@@ -45,12 +45,12 @@ The source requires the CUDA runtime, cuRAND headers, a CUDA-capable C++ compile
 
 The target's benchmark trajectory is a circle with center `(5, 4)`, radius `3`, and angular increment `0.05` radians per update. Its position at step `t` is:
 
-$$
+```math
 \begin{aligned}
 \operatorname{truth}(t) &= \left(5 + 3\cos(0.05t),\; 4 + 3\sin(0.05t)\right) \\
 \Delta(t) &= \operatorname{truth}(t) - \operatorname{truth}(t - 1)
 \end{aligned}
-$$
+```
 
 The three beacons are `(0, 0)`, `(10, 0)`, and `(5, 10)`. For each beacon, the observed range is its Euclidean distance from the current truth plus Gaussian noise with standard deviation `0.2`. The benchmark seeds the sensor-noise generator with `42`.
 
@@ -58,33 +58,33 @@ At initialization, particle positions are sampled independently from a normal di
 
 For particle `i`, the motion-noise standard deviation scales with the magnitude of target displacement. Two independent normal samples perturb its position:
 
-$$
+```math
 \begin{aligned}
 \sigma_{\text{motion}} &= 0.01 + 0.05\,\operatorname{hypot}(\Delta_x, \Delta_y) \\
 x_i' &= x_i + \Delta_x + \sigma_{\text{motion}}\,\epsilon_x \\
 y_i' &= y_i + \Delta_y + \sigma_{\text{motion}}\,\epsilon_y
 \end{aligned}
-$$
+```
 
 For sensor `j`, let `d_ij` be the predicted distance from moved particle `i` to beacon `j`, `r_j` the observed range, and `sigma_j` the sensor standard deviation. The code computes a Gaussian range likelihood and multiplies the three sensor values to get the particle weight:
 
-$$
+```math
 \begin{aligned}
 z_{ij} &= \frac{d_{ij} - r_j}{\sigma_j} \\
 L_{ij} &= \exp\left(-\frac{1}{2}z_{ij}^2\right) \\
 w_i &= L_{i0}L_{i1}L_{i2}
 \end{aligned}
-$$
+```
 
 The position prediction is the weighted mean of the moved population, computed before resampling:
 
-$$
+```math
 \begin{aligned}
 W &= \sum_i w_i \\
 \hat{x} &= \frac{\sum_i x_i' w_i}{W} \\
 \hat{y} &= \frac{\sum_i y_i' w_i}{W}
 \end{aligned}
-$$
+```
 
 ### Update algorithm
 
@@ -117,9 +117,9 @@ Each launch uses 256 threads per block. The grid has `ceil(N / 256)` blocks, and
 
 After the scan, the host reads the final cumulative weight, `total_weight = cumulative[N - 1]`. It draws one uniform offset `u0`; for output index `k`, the resampling target is:
 
-$$
+```math
 t_k = \frac{u_0 + k}{N}\,W
-$$
+```
 
 `resampleKernel` performs a lower-bound binary search for the first cumulative weight greater than or equal to `target_k`. The output thread copies that source particle to the alternate buffer and sets its output weight to `1/N`. Once the kernel is queued, the two particle-buffer pointers are swapped for the next call to `iterate`.
 
