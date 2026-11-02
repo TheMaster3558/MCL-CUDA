@@ -1,7 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="240" viewBox="0 0 1200 240" role="img" aria-labelledby="title desc">
-  <title id="title">MCL CUDA</title>
-  <desc id="desc">GPU-accelerated particle filtering.</desc>
-  <rect width="1200" height="240" rx="18" fill="#F4F3EE"/>
-  <text x="600" y="116" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="64" font-weight="700" letter-spacing="-2" fill="#17191B">MCL CUDA</text>
-  <text x="600" y="164" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="22" fill="#4D5051">GPU-accelerated particle filtering</text>
-</svg>

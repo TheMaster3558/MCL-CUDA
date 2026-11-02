@@ -1,6 +1,4 @@
-<p align="center">
-  <img src="assets/readme/hero.svg" width="100%" alt="MCL CUDA — GPU-accelerated particle filtering">
-</p>
+# Monte Carlo Localization (MCL) with CUDA
 
 ## Overview
 
