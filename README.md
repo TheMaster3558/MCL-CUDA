@@ -4,7 +4,7 @@
 
 This project estimates a moving point's 2D position from noisy distance readings to three fixed beacons. A CUDA particle filter propagates candidate positions, scores them against each observation, computes a weighted estimate, and resamples the population for the next update.
 
-The benchmark simulates a circular path centered at `(5, 4)` and exercises particle counts from 1,024 to 33,554,432. See [README2.md](README2.md) for the update equations, kernel structure, memory flow, scan implementation, and benchmark methodology.
+The benchmark simulates a circular path centered at `(5, 4)` and exercises particle counts from 1,024 to 33,554,432. The technical sections below describe the update equations, kernel structure, memory flow, scan implementation, and benchmark methodology.
 
 ## GPU benchmark
 
