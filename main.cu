@@ -194,15 +194,6 @@ int main() {
     int deviceCount = 0;
     CUDA_CHECK(cudaGetDeviceCount(&deviceCount));
 
-    printf("CPU: %s\n", cpuName.c_str());
-    for (int device = 0; device < deviceCount; ++device) {
-        cudaDeviceProp properties;
-        CUDA_CHECK(cudaGetDeviceProperties(&properties, device));
-        printf("GPU %d of %d: %s (SM %d.%d, %d SMs, %.1f GB)\n", device,
-               deviceCount, properties.name, properties.major,
-               properties.minor, properties.multiProcessorCount,
-               properties.totalGlobalMem / (1024.0 * 1024.0 * 1024.0));
-    }
     printf("%10s %-18s %12s %12s %12s\n", "particles", "device",
            "ms/iter", "M particles/s", "RMSE");
 
@@ -213,6 +204,13 @@ int main() {
     const std::size_t maxCpuParticles = 1u << 20;
     for (int device = 0; device < deviceCount; ++device) {
         CUDA_CHECK(cudaSetDevice(device));
+        cudaDeviceProp properties;
+        CUDA_CHECK(cudaGetDeviceProperties(&properties, device));
+        printf("GPU %d of %d: %s (SM %d.%d, %d SMs, %.1f GB)\n", device,
+               deviceCount, properties.name, properties.major,
+               properties.minor, properties.multiProcessorCount,
+               properties.totalGlobalMem / (1024.0 * 1024.0 * 1024.0));
+
         const std::string deviceName = "GPU " + std::to_string(device);
         for (std::size_t n : particleCounts) {
             std::size_t freeBytes = 0;
@@ -245,6 +243,7 @@ int main() {
     }
 
     // Run the full CPU benchmark after every GPU has finished.
+    printf("CPU: %s\n", cpuName.c_str());
     for (std::size_t n : particleCounts) {
         if (n <= maxCpuParticles) {
             constexpr int cpuWarmupIters = 3;
