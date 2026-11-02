@@ -1,42 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="400" viewBox="0 0 1200 400" role="img" aria-labelledby="title desc">
-  <title id="title">CUDA Particle Filter</title>
-  <desc id="desc">A GPU particle filter estimates a moving point from noisy ranges to three beacons. The diagram shows a circular trajectory, beacon locations, and a cloud of candidate particles.</desc>
-  <rect width="1200" height="400" rx="18" fill="#F4F3EE"/>
-  <path d="M0 18Q0 0 18 0H1182Q1200 0 1200 18V382Q1200 400 1182 400H18Q0 400 0 382Z" fill="#F4F3EE" stroke="#D7D6D0" stroke-width="2"/>
-  <g font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" fill="#17191B">
-    <text x="64" y="68" font-size="18" font-weight="700" letter-spacing="2.4" fill="#2A5D8F">CUDA / SEQUENTIAL MONTE CARLO</text>
-    <text x="60" y="150" font-size="58" font-weight="720" letter-spacing="-2">CUDA Particle</text>
-    <text x="60" y="216" font-size="58" font-weight="720" letter-spacing="-2">Filter</text>
-    <text x="64" y="264" font-size="22" fill="#4D5051">GPU position estimation from noisy beacon ranges.</text>
-    <line x1="64" y1="298" x2="645" y2="298" stroke="#CBCAC3" stroke-width="2"/>
-    <text x="64" y="346" font-size="34" font-weight="700" fill="#2A5D8F">702.73M</text>
-    <text x="219" y="342" font-size="19" font-weight="650">particle updates / second</text>
-    <text x="219" y="367" font-size="17" fill="#666967">Peak recorded throughput · 1,048,576 particles</text>
-  </g>
-  <g transform="translate(700 32)" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">
-    <rect x="0" y="0" width="450" height="336" rx="12" fill="#ECEBE5" stroke="#D7D6D0" stroke-width="2"/>
-    <g stroke="#D6D5CE" stroke-width="1">
-      <path d="M32 72H418M32 132H418M32 192H418M32 252H418"/>
-      <path d="M82 32V304M142 32V304M202 32V304M262 32V304M322 32V304M382 32V304"/>
-    </g>
-    <path d="M99 223 A128 128 0 1 1 355 223 A128 128 0 1 1 99 223" fill="none" stroke="#2A5D8F" stroke-width="3" stroke-dasharray="9 8" opacity=".72"/>
-    <path d="M99 223L220 98M355 223L220 98M225 288L220 98" fill="none" stroke="#B9784F" stroke-width="2" stroke-dasharray="5 6" opacity=".56"/>
-    <g fill="#2A5D8F" opacity=".78">
-      <circle cx="300" cy="186" r="5"/><circle cx="309" cy="194" r="4"/><circle cx="319" cy="181" r="5"/><circle cx="326" cy="198" r="4"/>
-      <circle cx="291" cy="202" r="4"/><circle cx="303" cy="211" r="4"/><circle cx="314" cy="207" r="5"/><circle cx="333" cy="187" r="4"/>
-      <circle cx="323" cy="217" r="4"/><circle cx="337" cy="205" r="4"/><circle cx="296" cy="176" r="4"/><circle cx="312" cy="169" r="4"/>
-      <circle cx="341" cy="219" r="4"/><circle cx="281" cy="190" r="4"/><circle cx="328" cy="174" r="4"/><circle cx="304" cy="225" r="4"/>
-      <circle cx="348" cy="193" r="4"/><circle cx="288" cy="215" r="4"/><circle cx="318" cy="229" r="4"/><circle cx="337" cy="168" r="4"/>
-    </g>
-    <circle cx="318" cy="198" r="9" fill="#17191B" stroke="#F4F3EE" stroke-width="3"/>
-    <g fill="#E17A35" stroke="#F4F3EE" stroke-width="3">
-      <path d="M220 82l12 21h-24z"/><path d="M99 207l12 21H87z"/><path d="M355 207l12 21h-24z"/>
-    </g>
-    <g font-size="16" font-weight="650" fill="#555957">
-      <text x="22" y="30">2D STATE SPACE</text>
-      <text x="32" y="322">● particles</text>
-      <text x="155" y="322">● estimate</text>
-      <text x="278" y="322" fill="#A85A2C">▲ range beacons</text>
-    </g>
-  </g>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="240" viewBox="0 0 1200 240" role="img" aria-labelledby="title desc">
+  <title id="title">MCL CUDA</title>
+  <desc id="desc">GPU-accelerated particle filtering.</desc>
+  <rect width="1200" height="240" rx="18" fill="#F4F3EE"/>
+  <text x="600" y="116" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="64" font-weight="700" letter-spacing="-2" fill="#17191B">MCL CUDA</text>
+  <text x="600" y="164" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="22" fill="#4D5051">GPU-accelerated particle filtering</text>
 </svg>

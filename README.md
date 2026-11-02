@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/readme/hero.svg" width="100%" alt="CUDA Particle Filter: GPU position estimation from noisy beacon ranges, with a trajectory, beacon locations, and particle cloud">
+  <img src="assets/readme/hero.svg" width="100%" alt="MCL CUDA — GPU-accelerated particle filtering">
 </p>
 
 ## Overview
