@@ -211,21 +211,9 @@ int main() {
         1u << 22, 1u << 23, 1u << 24, 1u << 25, 1u << 26};
     const std::size_t bytesPerParticle = 80;
     const std::size_t maxCpuParticles = 1u << 20;
-    for (std::size_t n : particleCounts) {
-        int warmupIters = 20;
-        int timedIters = 200;
-        if (n >= (1u << 22)) {
-            warmupIters = 5;
-            timedIters = 50;
-        }
-        if (n >= (1u << 25)) {
-            warmupIters = 2;
-            timedIters = 20;
-        }
-
-        for (int device = 0; device < deviceCount; ++device) {
-            CUDA_CHECK(cudaSetDevice(device));
-
+    for (int device = 0; device < deviceCount; ++device) {
+        CUDA_CHECK(cudaSetDevice(device));
+        for (std::size_t n : particleCounts) {
             std::size_t freeBytes = 0;
             std::size_t totalBytes = 0;
             CUDA_CHECK(cudaMemGetInfo(&freeBytes, &totalBytes));
@@ -236,13 +224,26 @@ int main() {
                 continue;
             }
 
+            int warmupIters = 20;
+            int timedIters = 200;
+            if (n >= (1u << 22)) {
+                warmupIters = 5;
+                timedIters = 50;
+            }
+            if (n >= (1u << 25)) {
+                warmupIters = 2;
+                timedIters = 20;
+            }
+
             BenchResult result = runBenchmark(n, warmupIters, timedIters);
             double throughput = (n / 1e6) / (result.msPerIter / 1e3);
             printf("%10zu GPU %d %12.4f %12.2f %12.4f\n", n, device,
                    result.msPerIter, throughput, result.rmse);
         }
+    }
 
-        // Run the CPU benchmark after all GPUs, on the same thread.
+    // Run the full CPU benchmark after every GPU has finished.
+    for (std::size_t n : particleCounts) {
         if (n <= maxCpuParticles) {
             constexpr int cpuWarmupIters = 3;
             constexpr int cpuTimedIters = 30;
