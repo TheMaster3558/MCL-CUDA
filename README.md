@@ -45,10 +45,12 @@ The source requires the CUDA runtime, cuRAND headers, a CUDA-capable C++ compile
 
 The target's benchmark trajectory is a circle with center `(5, 4)`, radius `3`, and angular increment `0.05` radians per update. Its position at step `t` is:
 
-```text
-truth(t) = (5 + 3*cos(0.05*t), 4 + 3*sin(0.05*t))
-delta(t) = truth(t) - truth(t - 1)
-```
+$$
+\begin{aligned}
+\operatorname{truth}(t) &= \left(5 + 3\cos(0.05t),\; 4 + 3\sin(0.05t)\right) \\
+\Delta(t) &= \operatorname{truth}(t) - \operatorname{truth}(t - 1)
+\end{aligned}
+$$
 
 The three beacons are `(0, 0)`, `(10, 0)`, and `(5, 10)`. For each beacon, the observed range is its Euclidean distance from the current truth plus Gaussian noise with standard deviation `0.2`. The benchmark seeds the sensor-noise generator with `42`.
 
@@ -56,27 +58,33 @@ At initialization, particle positions are sampled independently from a normal di
 
 For particle `i`, the motion-noise standard deviation scales with the magnitude of target displacement. Two independent normal samples perturb its position:
 
-```text
-motion_stddev = 0.01 + 0.05 * hypot(delta.x, delta.y)
-x_i' = x_i + delta.x + motion_stddev * normal_sample()
-y_i' = y_i + delta.y + motion_stddev * normal_sample()
-```
+$$
+\begin{aligned}
+\sigma_{\text{motion}} &= 0.01 + 0.05\,\operatorname{hypot}(\Delta_x, \Delta_y) \\
+x_i' &= x_i + \Delta_x + \sigma_{\text{motion}}\,\epsilon_x \\
+y_i' &= y_i + \Delta_y + \sigma_{\text{motion}}\,\epsilon_y
+\end{aligned}
+$$
 
 For sensor `j`, let `d_ij` be the predicted distance from moved particle `i` to beacon `j`, `r_j` the observed range, and `sigma_j` the sensor standard deviation. The code computes a Gaussian range likelihood and multiplies the three sensor values to get the particle weight:
 
-```text
-z_ij = (d_ij - r_j) / sigma_j
-likelihood_ij = exp(-0.5 * z_ij * z_ij)
-weight_i = likelihood_i0 * likelihood_i1 * likelihood_i2
-```
+$$
+\begin{aligned}
+z_{ij} &= \frac{d_{ij} - r_j}{\sigma_j} \\
+L_{ij} &= \exp\left(-\frac{1}{2}z_{ij}^2\right) \\
+w_i &= L_{i0}L_{i1}L_{i2}
+\end{aligned}
+$$
 
 The position prediction is the weighted mean of the moved population, computed before resampling:
 
-```text
-total_weight = sum_i(weight_i)
-prediction.x = sum_i(x_i' * weight_i) / total_weight
-prediction.y = sum_i(y_i' * weight_i) / total_weight
-```
+$$
+\begin{aligned}
+W &= \sum_i w_i \\
+\hat{x} &= \frac{\sum_i x_i' w_i}{W} \\
+\hat{y} &= \frac{\sum_i y_i' w_i}{W}
+\end{aligned}
+$$
 
 ### Update algorithm
 
@@ -109,9 +117,9 @@ Each launch uses 256 threads per block. The grid has `ceil(N / 256)` blocks, and
 
 After the scan, the host reads the final cumulative weight, `total_weight = cumulative[N - 1]`. It draws one uniform offset `u0`; for output index `k`, the resampling target is:
 
-```text
-target_k = ((u0 + k) / N) * total_weight
-```
+$$
+t_k = \frac{u_0 + k}{N}\,W
+$$
 
 `resampleKernel` performs a lower-bound binary search for the first cumulative weight greater than or equal to `target_k`. The output thread copies that source particle to the alternate buffer and sets its output weight to `1/N`. Once the kernel is queued, the two particle-buffer pointers are swapped for the next call to `iterate`.
 
