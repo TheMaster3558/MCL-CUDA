@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="520" viewBox="0 0 1200 520" role="img" aria-labelledby="title desc">
+  <title id="title">CUDA particle filter update pipeline</title>
+  <desc id="desc">Each update moves and scores particles, then branches into a weighted-position reduction and a hierarchical weight scan. Host copies provide the estimate and total weight; systematic resampling writes a second particle buffer, which is swapped for the next iteration.</desc>
+  <rect width="1200" height="520" rx="14" fill="#F4F3EE" stroke="#D7D6D0" stroke-width="2"/>
+  <g font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" fill="#17191B">
+    <text x="52" y="54" font-size="28" font-weight="700">One update · GPU data flow</text>
+    <text x="52" y="82" font-size="18" fill="#666967">256 threads per block · per-particle work followed by global aggregation</text>
+  </g>
+  <g font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" text-anchor="middle">
+    <rect x="52" y="120" width="232" height="96" rx="10" fill="#E6E5DF" stroke="#BDBDB6" stroke-width="2"/>
+    <text x="168" y="157" font-size="20" font-weight="700" fill="#17191B">MOVE + SCORE</text><text x="168" y="188" font-size="17" fill="#555957">one thread / particle</text>
+    <path d="M285 168H342" stroke="#606563" stroke-width="3"/><path d="M342 168l-12-8v16z" fill="#606563"/>
+    <rect x="350" y="120" width="232" height="96" rx="10" fill="#E3EBF1" stroke="#9BB1C3" stroke-width="2"/>
+    <text x="466" y="157" font-size="20" font-weight="700" fill="#17191B">WEIGHTED SUM</text><text x="466" y="188" font-size="17" fill="#555957">block tree reduction</text>
+    <path d="M583 168H640" stroke="#606563" stroke-width="3"/><path d="M640 168l-12-8v16z" fill="#606563"/>
+    <rect x="648" y="120" width="232" height="96" rx="10" fill="#E3EBF1" stroke="#9BB1C3" stroke-width="2"/>
+    <text x="764" y="157" font-size="20" font-weight="700" fill="#17191B">PREFIX SCAN</text><text x="764" y="188" font-size="17" fill="#555957">hierarchical · double</text>
+    <path d="M881 168H938" stroke="#606563" stroke-width="3"/><path d="M938 168l-12-8v16z" fill="#606563"/>
+    <rect x="946" y="120" width="202" height="96" rx="10" fill="#F3E6DC" stroke="#D6A17C" stroke-width="2"/>
+    <text x="1047" y="157" font-size="20" font-weight="700" fill="#17191B">RESAMPLE</text><text x="1047" y="188" font-size="17" fill="#555957">systematic + search</text>
+  </g>
+  <path d="M466 218V272H242" fill="none" stroke="#2A5D8F" stroke-width="2.5"/><path d="M242 272v24" stroke="#2A5D8F" stroke-width="2.5"/><path d="M242 296l-7-11h14z" fill="#2A5D8F"/>
+  <path d="M764 218V272H644" fill="none" stroke="#2A5D8F" stroke-width="2.5"/><path d="M644 272v24" stroke="#2A5D8F" stroke-width="2.5"/><path d="M644 296l-7-11h14z" fill="#2A5D8F"/>
+  <g font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" text-anchor="middle">
+    <rect x="52" y="304" width="380" height="78" rx="9" fill="#FFFFFF" stroke="#C9C8C1" stroke-width="2"/>
+    <text x="242" y="337" font-size="19" font-weight="700" fill="#17191B">weighted position sum → host</text><text x="242" y="364" font-size="17" fill="#555957">normalize by total weight → estimate</text>
+    <rect x="454" y="304" width="380" height="78" rx="9" fill="#FFFFFF" stroke="#C9C8C1" stroke-width="2"/>
+    <text x="644" y="337" font-size="19" font-weight="700" fill="#17191B">cumulative weights → host</text><text x="644" y="364" font-size="17" fill="#555957">last scan value supplies total weight</text>
+  </g>
+  <path d="M834 344H900V266H1047V220" fill="none" stroke="#606563" stroke-width="2.5"/><path d="M1047 220l-7 12h14z" fill="#606563"/>
+  <g font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" text-anchor="middle">
+    <rect x="946" y="304" width="202" height="78" rx="9" fill="#FFFFFF" stroke="#C9C8C1" stroke-width="2"/>
+    <text x="1047" y="337" font-size="19" font-weight="700" fill="#17191B">alternate buffer</text><text x="1047" y="364" font-size="17" fill="#555957">write N particles</text>
+  </g>
+  <path d="M1047 384V434H168V220" fill="none" stroke="#2A5D8F" stroke-width="2.5" stroke-dasharray="8 7"/><path d="M168 220l-7 12h14z" fill="#2A5D8F"/>
+  <text x="605" y="465" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="18" font-weight="650" fill="#2A5D8F" text-anchor="middle">swap particle buffers · reset resampled weights to 1/N · begin next update</text>
+</svg>

@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="430" viewBox="0 0 1200 430" role="img" aria-labelledby="title desc">
+  <title id="title">GPU particle update throughput</title>
+  <desc id="desc">Measured throughput rises with particle count and levels near 600 to 700 million particle updates per second on an RTX 4050 Laptop GPU. The highest recorded value is 702.73 million at 1,048,576 particles.</desc>
+  <rect width="1200" height="430" rx="14" fill="#F4F3EE" stroke="#D7D6D0" stroke-width="2"/>
+  <g font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" fill="#17191B">
+    <text x="60" y="58" font-size="27" font-weight="700">GPU throughput by particle count</text>
+    <text x="60" y="87" font-size="18" fill="#666967">Million particle updates per second · measured values from results.txt</text>
+    <text x="35" y="215" transform="rotate(-90 35 215)" font-size="17" fill="#666967" text-anchor="middle">M particles / s</text>
+  </g>
+  <g stroke="#D3D2CB" stroke-width="1">
+    <path d="M110 112H1145M110 169H1145M110 226H1145M110 283H1145M110 340H1145"/>
+  </g>
+  <g font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="17" fill="#666967" text-anchor="end">
+    <text x="96" y="346">0</text><text x="96" y="289">200</text><text x="96" y="232">400</text><text x="96" y="175">600</text><text x="96" y="118">800</text>
+  </g>
+  <g fill="#2A5D8F">
+    <rect x="142" y="338" width="58" height="2" rx="3"/><rect x="240" y="332" width="58" height="8" rx="3"/>
+    <rect x="338" y="314" width="58" height="26" rx="3"/><rect x="436" y="260" width="58" height="80" rx="3"/>
+    <rect x="534" y="195" width="58" height="145" rx="3"/><rect x="632" y="140" width="58" height="200" rx="3" fill="#E17A35"/>
+    <rect x="730" y="154" width="58" height="186" rx="3"/><rect x="828" y="158" width="58" height="182" rx="3"/>
+    <rect x="926" y="159" width="58" height="181" rx="3"/><rect x="1024" y="165" width="58" height="175" rx="3"/>
+  </g>
+  <g font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="17" font-weight="650" fill="#3C4040" text-anchor="middle">
+    <text x="171" y="322">7.19</text><text x="269" y="316">28.53</text><text x="367" y="298">92.07</text><text x="465" y="244">281.75</text>
+    <text x="563" y="179">509.67</text><text x="661" y="124" fill="#A85A2C">702.73</text><text x="759" y="138">651.22</text>
+    <text x="857" y="142">638.31</text><text x="955" y="143">636.56</text><text x="1053" y="149">616.61</text>
+  </g>
+  <g font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="17" fill="#555957" text-anchor="middle">
+    <text x="171" y="376">1K</text><text x="269" y="376">4K</text><text x="367" y="376">16K</text><text x="465" y="376">65K</text><text x="563" y="376">262K</text>
+    <text x="661" y="376">1M</text><text x="759" y="376">4M</text><text x="857" y="376">8M</text><text x="955" y="376">16M</text><text x="1053" y="376">34M</text>
+  </g>
+  <text x="628" y="410" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="17" fill="#666967" text-anchor="middle">Particle count (sampled benchmark sizes)</text>
+</svg>

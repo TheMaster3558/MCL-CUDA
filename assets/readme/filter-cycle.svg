@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="520" viewBox="0 0 1200 520" role="img" aria-labelledby="title desc">
+  <title id="title">Particle-filter update cycle</title>
+  <desc id="desc">Motion and three range observations feed particle propagation and likelihood weighting. The weights branch to a pre-resampling position estimate and to a scan and systematic resampling path that creates the next particle set.</desc>
+  <rect width="1200" height="520" rx="14" fill="#F4F3EE" stroke="#D7D6D0" stroke-width="2"/>
+  <g font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" fill="#17191B">
+    <text x="54" y="54" font-size="28" font-weight="700">Particle update · two outputs from one weighted population</text>
+    <text x="54" y="83" font-size="18" fill="#666967">The weighted mean reports the current estimate; resampling prepares the next state.</text>
+  </g>
+  <g font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" text-anchor="middle">
+    <rect x="52" y="126" width="245" height="104" rx="10" fill="#FFFFFF" stroke="#C9C8C1" stroke-width="2"/>
+    <text x="174" y="165" font-size="21" font-weight="700" fill="#17191B">OBSERVATIONS</text>
+    <text x="174" y="198" font-size="19" fill="#555957">motion delta + 3 ranges</text>
+    <path d="M298 178H337" stroke="#606563" stroke-width="3"/><path d="M337 178l-12-8v16z" fill="#606563"/>
+
+    <rect x="345" y="126" width="245" height="104" rx="10" fill="#E3EBF1" stroke="#9BB1C3" stroke-width="2"/>
+    <text x="467" y="165" font-size="21" font-weight="700" fill="#17191B">PROPAGATE</text>
+    <text x="467" y="198" font-size="19" fill="#555957">one thread per particle</text>
+    <path d="M591 178H630" stroke="#606563" stroke-width="3"/><path d="M630 178l-12-8v16z" fill="#606563"/>
+
+    <rect x="638" y="126" width="292" height="104" rx="10" fill="#E3EBF1" stroke="#9BB1C3" stroke-width="2"/>
+    <text x="784" y="165" font-size="21" font-weight="700" fill="#17191B">SCORE PARTICLES</text>
+    <text x="784" y="198" font-size="19" fill="#555957">multiply 3 range likelihoods</text>
+  </g>
+
+  <path d="M784 232V273H311V297" fill="none" stroke="#2A5D8F" stroke-width="2.5"/>
+  <path d="M311 297l-7-12h14z" fill="#2A5D8F"/>
+  <path d="M784 273H888V297" fill="none" stroke="#B9784F" stroke-width="2.5"/>
+  <path d="M888 297l-7-12h14z" fill="#B9784F"/>
+
+  <g font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">
+    <rect x="72" y="306" width="478" height="112" rx="10" fill="#E3EBF1" stroke="#9BB1C3" stroke-width="2"/>
+    <text x="104" y="345" font-size="21" font-weight="700" fill="#2A5D8F">ESTIMATE · BEFORE RESAMPLING</text>
+    <text x="104" y="381" font-size="19" fill="#333738">weighted position sum ÷ total weight</text>
+
+    <rect x="648" y="306" width="478" height="112" rx="10" fill="#F3E6DC" stroke="#D6A17C" stroke-width="2"/>
+    <text x="680" y="345" font-size="21" font-weight="700" fill="#A85A2C">NEXT PARTICLE SET</text>
+    <text x="680" y="381" font-size="19" fill="#333738">inclusive scan → systematic sample → buffer</text>
+  </g>
+
+  <path d="M888 420V478H600V178H590" fill="none" stroke="#2A5D8F" stroke-width="2.5" stroke-dasharray="8 7"/>
+  <path d="M590 178l12-7v14z" fill="#2A5D8F"/>
+  <rect x="454" y="448" width="360" height="30" rx="6" fill="#F4F3EE"/>
+  <text x="634" y="470" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="18" font-weight="650" fill="#2A5D8F" text-anchor="middle">swap buffers · reset weights to 1/N · repeat</text>
+</svg>
