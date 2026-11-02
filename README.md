@@ -47,8 +47,8 @@ The target's benchmark trajectory is a circle with center `(5, 4)`, radius `3`, 
 
 ```math
 \begin{aligned}
-\operatorname{truth}(t) &= \left(5 + 3\cos(0.05t),\; 4 + 3\sin(0.05t)\right) \\
-\Delta(t) &= \operatorname{truth}(t) - \operatorname{truth}(t - 1)
+\mathrm{truth}(t) &= \left(5 + 3\cos(0.05t),\; 4 + 3\sin(0.05t)\right) \\
+\Delta(t) &= \mathrm{truth}(t) - \mathrm{truth}(t - 1)
 \end{aligned}
 ```
 
@@ -60,7 +60,7 @@ For particle `i`, the motion-noise standard deviation scales with the magnitude 
 
 ```math
 \begin{aligned}
-\sigma_{\text{motion}} &= 0.01 + 0.05\,\operatorname{hypot}(\Delta_x, \Delta_y) \\
+\sigma_{\text{motion}} &= 0.01 + 0.05\,\mathrm{hypot}(\Delta_x, \Delta_y) \\
 x_i' &= x_i + \Delta_x + \sigma_{\text{motion}}\,\epsilon_x \\
 y_i' &= y_i + \Delta_y + \sigma_{\text{motion}}\,\epsilon_y
 \end{aligned}
