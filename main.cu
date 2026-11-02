@@ -210,7 +210,7 @@ int main() {
         1u << 10, 1u << 12, 1u << 14, 1u << 16, 1u << 18, 1u << 20,
         1u << 22, 1u << 23, 1u << 24, 1u << 25};
     const std::size_t bytesPerParticle = 80;
-    const double memoryHeadroomFactor = 1.25;
+    const std::size_t maxCpuParticles = 1u << 20;
     for (int device = 0; device < deviceCount; ++device) {
         CUDA_CHECK(cudaSetDevice(device));
         const std::string deviceName = "GPU " + std::to_string(device);
@@ -218,11 +218,9 @@ int main() {
             std::size_t freeBytes = 0;
             std::size_t totalBytes = 0;
             CUDA_CHECK(cudaMemGetInfo(&freeBytes, &totalBytes));
-            const double requiredBytes =
-                n * bytesPerParticle * memoryHeadroomFactor;
-            if (requiredBytes > freeBytes) {
+            if (n * bytesPerParticle > freeBytes) {
                 printf("%10zu %-18s skipped (needs ~%.1f GB, %.1f GB free)\n",
-                       n, deviceName.c_str(), requiredBytes / 1e9,
+                       n, deviceName.c_str(), n * bytesPerParticle / 1e9,
                        freeBytes / 1e9);
                 continue;
             }
@@ -248,13 +246,18 @@ int main() {
 
     // Run the full CPU benchmark after every GPU has finished.
     for (std::size_t n : particleCounts) {
-        constexpr int cpuWarmupIters = 3;
-        constexpr int cpuTimedIters = 30;
-        BenchResult result = runCpuBenchmark(
-            n, cpuWarmupIters, cpuTimedIters);
-        double throughput = (n / 1e6) / (result.msPerIter / 1e3);
-        printf("%10zu %-18s %12.4f %12.2f %12.4f\n", n, "CPU",
-               result.msPerIter, throughput, result.rmse);
+        if (n <= maxCpuParticles) {
+            constexpr int cpuWarmupIters = 3;
+            constexpr int cpuTimedIters = 30;
+            BenchResult result = runCpuBenchmark(
+                n, cpuWarmupIters, cpuTimedIters);
+            double throughput = (n / 1e6) / (result.msPerIter / 1e3);
+            printf("%10zu %-18s %12.4f %12.2f %12.4f\n", n, "CPU",
+                   result.msPerIter, throughput, result.rmse);
+        } else {
+            printf("%10zu %-18s %12s %12s %12s\n", n, "CPU", "skipped",
+                   "skipped", "skipped");
+        }
     }
 
     return 0;
