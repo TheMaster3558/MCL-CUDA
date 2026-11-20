@@ -199,9 +199,9 @@ int main() {
 
     const std::size_t particleCounts[] = {
         1u << 10, 1u << 12, 1u << 14, 1u << 16, 1u << 18, 1u << 20,
-        1u << 22, 1u << 23, 1u << 24, 1u << 25};
+        1u << 22, 1u << 23, 1u << 24, 1u << 26, 1u << 28};
     const std::size_t bytesPerParticle = 80;
-    const std::size_t maxCpuParticles = 1u << 20;
+    const std::size_t maxCpuParticles = 1u << 22;
     for (int device = 0; device < deviceCount; ++device) {
         CUDA_CHECK(cudaSetDevice(device));
         cudaDeviceProp properties;
