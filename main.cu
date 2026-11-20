@@ -11,6 +11,10 @@
 #include <string>
 #include <vector>
 
+#if defined(__linux__)
+#include <unistd.h>
+#endif
+
 #if defined(_MSC_VER)
 #include <intrin.h>
 #elif defined(__GNUC__) || defined(__clang__)
@@ -39,6 +43,50 @@ struct BenchResult {
     double msPerIter;
     double rmse;
 };
+
+constexpr double bytesPerGB = 1e9;
+
+static void printMemoryUsage(double usedBytes, double totalBytes) {
+    printf(" %7.2f / %7.2f\n", usedBytes / bytesPerGB,
+           totalBytes / bytesPerGB);
+}
+
+static void printGpuMemoryUsage() {
+    std::size_t freeBytes;
+    std::size_t totalBytes;
+    if (cudaMemGetInfo(&freeBytes, &totalBytes) == cudaSuccess) {
+        printMemoryUsage(totalBytes - freeBytes, totalBytes);
+    } else {
+        printf(" %17s\n", "N/A");
+    }
+}
+
+static void printBenchmarkResult(std::size_t particles, const char* device,
+                                 const BenchResult& result) {
+    const double throughput = (particles / 1e6) / (result.msPerIter / 1e3);
+    printf("%10zu %-18s %12.4f %12.2f %12.4f", particles, device,
+           result.msPerIter, throughput, result.rmse);
+}
+
+static void printCpuMemoryUsage() {
+#if defined(__linux__)
+    if (FILE* statm = std::fopen("/proc/self/statm", "r")) {
+        unsigned long virtualPages;
+        unsigned long residentPages;
+        const int fields = std::fscanf(statm, "%lu %lu", &virtualPages,
+                                       &residentPages);
+        std::fclose(statm);
+        const long pageSize = sysconf(_SC_PAGESIZE);
+        const long totalPages = sysconf(_SC_PHYS_PAGES);
+        if (fields == 2 && pageSize > 0 && totalPages > 0) {
+            printMemoryUsage(residentPages * static_cast<double>(pageSize),
+                             totalPages * static_cast<double>(pageSize));
+            return;
+        }
+    }
+#endif
+    printf(" %17s\n", "N/A");
+}
 
 static std::string getCpuName() {
     char brand[49] = {};
@@ -72,8 +120,8 @@ static std::string getCpuName() {
     return name.substr(first, last - first + 1);
 }
 
-static BenchResult runBenchmark(std::size_t nParticles, int warmupIters,
-                                int timedIters) {
+static void runBenchmark(std::size_t nParticles, int warmupIters,
+                         int timedIters, const std::string& deviceName) {
     const float2 beacons[3] = {{0.f, 0.f}, {10.f, 0.f}, {5.f, 10.f}};
     const float sensorSigma = 0.2f;
 
@@ -128,11 +176,14 @@ static BenchResult runBenchmark(std::size_t nParticles, int warmupIters,
         }
     }
 
-    return {totalMs / timedIters, std::sqrt(squaredError / errorCount)};
+    printBenchmarkResult(nParticles, deviceName.c_str(),
+                         {totalMs / timedIters, std::sqrt(squaredError / errorCount)});
+    printGpuMemoryUsage();
+    std::fflush(stdout);
 }
 
-static BenchResult runCpuBenchmark(std::size_t nParticles, int warmupIters,
-                                   int timedIters) {
+static void runCpuBenchmark(std::size_t nParticles, int warmupIters,
+                            int timedIters) {
     const float2 beacons[3] = {{0.f, 0.f}, {10.f, 0.f}, {5.f, 10.f}};
     const float sensorSigma = 0.2f;
 
@@ -173,10 +224,11 @@ static BenchResult runCpuBenchmark(std::size_t nParticles, int warmupIters,
         auto start = std::chrono::steady_clock::now();
         particleFilter.iterate(CpuPoint{delta.x, delta.y}, sensors, 3);
         auto end = std::chrono::steady_clock::now();
+        const double elapsedMs =
+            std::chrono::duration<double, std::milli>(end - start).count();
 
         if (step > warmupIters) {
-            totalMs +=
-                std::chrono::duration<double, std::milli>(end - start).count();
+            totalMs += elapsedMs;
 
             CpuPoint estimate = particleFilter.getPrediction();
             double errorX = estimate.x - truth.x;
@@ -186,7 +238,10 @@ static BenchResult runCpuBenchmark(std::size_t nParticles, int warmupIters,
         }
     }
 
-    return {totalMs / timedIters, std::sqrt(squaredError / errorCount)};
+    printBenchmarkResult(nParticles, "CPU",
+                         {totalMs / timedIters, std::sqrt(squaredError / errorCount)});
+    printCpuMemoryUsage();
+    std::fflush(stdout);
 }
 
 int main() {
@@ -194,12 +249,14 @@ int main() {
     int deviceCount = 0;
     CUDA_CHECK(cudaGetDeviceCount(&deviceCount));
 
-    printf("%10s %-18s %12s %12s %12s\n", "particles", "device",
-           "ms/iter", "M particles/s", "RMSE");
+    printf("%10s %-18s %12s %12s %12s %17s\n", "particles", "device",
+           "ms/iter", "M particles/s", "RMSE", "used / total GB");
 
     const std::size_t particleCounts[] = {
-        1u << 10, 1u << 12, 1u << 14, 1u << 16, 1u << 18, 1u << 20,
-        1u << 22, 1u << 23, 1u << 24, 1u << 26, 1u << 28};
+        1u << 10, 1u << 11, 1u << 12, 1u << 13, 1u << 14, 1u << 15,
+        1u << 16, 1u << 17, 1u << 18, 1u << 19, 1u << 20, 1u << 21,
+        1u << 22, 1u << 23, 1u << 24, 1u << 25, 1u << 26, 1u << 27,
+        1u << 28};
     const std::size_t bytesPerParticle = 80;
     const std::size_t maxCpuParticles = 1u << 22;
     for (int device = 0; device < deviceCount; ++device) {
@@ -209,7 +266,7 @@ int main() {
         printf("GPU %d of %d: %s (SM %d.%d, %d SMs, %.1f GB)\n", device,
                deviceCount, properties.name, properties.major,
                properties.minor, properties.multiProcessorCount,
-               properties.totalGlobalMem / (1024.0 * 1024.0 * 1024.0));
+               properties.totalGlobalMem / bytesPerGB);
 
         const std::string deviceName = "GPU " + std::to_string(device);
         for (std::size_t n : particleCounts) {
@@ -218,8 +275,8 @@ int main() {
             CUDA_CHECK(cudaMemGetInfo(&freeBytes, &totalBytes));
             if (n * bytesPerParticle > freeBytes) {
                 printf("%10zu %-18s skipped (needs ~%.1f GB, %.1f GB free)\n",
-                       n, deviceName.c_str(), n * bytesPerParticle / 1e9,
-                       freeBytes / 1e9);
+                       n, deviceName.c_str(), n * bytesPerParticle / bytesPerGB,
+                       freeBytes / bytesPerGB);
                 continue;
             }
 
@@ -234,11 +291,7 @@ int main() {
                 timedIters = 20;
             }
 
-            BenchResult result = runBenchmark(n, warmupIters, timedIters);
-            double throughput = (n / 1e6) / (result.msPerIter / 1e3);
-            printf("%10zu %-18s %12.4f %12.2f %12.4f\n", n,
-                   deviceName.c_str(), result.msPerIter, throughput,
-                   result.rmse);
+            runBenchmark(n, warmupIters, timedIters, deviceName);
         }
     }
 
@@ -248,11 +301,7 @@ int main() {
         if (n <= maxCpuParticles) {
             constexpr int cpuWarmupIters = 3;
             constexpr int cpuTimedIters = 30;
-            BenchResult result = runCpuBenchmark(
-                n, cpuWarmupIters, cpuTimedIters);
-            double throughput = (n / 1e6) / (result.msPerIter / 1e3);
-            printf("%10zu %-18s %12.4f %12.2f %12.4f\n", n, "CPU",
-                   result.msPerIter, throughput, result.rmse);
+            runCpuBenchmark(n, cpuWarmupIters, cpuTimedIters);
         } else {
             printf("%10zu %-18s %12s %12s %12s\n", n, "CPU", "skipped",
                    "skipped", "skipped");
