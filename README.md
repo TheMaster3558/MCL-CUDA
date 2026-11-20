@@ -4,30 +4,33 @@
 
 This project implements a CUDA particle filter for estimating a moving target's position from observations. It propagates candidate positions, scores them against each observation, computes a weighted estimate, and resamples the population for the next update.
 
-The benchmark measures particle counts from 1,024 to 33,554,432. The sections below describe the filter's CUDA execution and the measured performance.
+The benchmark measures particle counts from 1,024 to 268,435,456. The sections below describe the filter's CUDA execution and the measured performance.
 
 ## GPU benchmark
 
-The recorded run reaches **702.73 million particle updates per second** at 1,048,576 particles on an NVIDIA GeForce RTX 4050 Laptop GPU. Throughput then levels near 617–651 million updates per second for the largest tested populations.
+The recorded run reaches **6,668.69 million particle updates per second** at 4,194,304 particles on an NVIDIA GeForce RTX 5090. Throughput stays near 6,350–6,670 million updates per second from 1,048,576 particles onward.
 
 <p align="center">
-  <img src="assets/readme/throughput.svg" width="100%" alt="Bar chart of measured GPU particle-update throughput for ten particle counts, peaking at 702.73 million updates per second at 1,048,576 particles">
+  <img src="assets/readme/throughput.svg" width="100%" alt="Bar chart of measured GPU particle-update throughput for 13 particle counts up to 268,435,456, peaking at 6,668.69 million updates per second at 4,194,304 particles">
 </p>
 
 | Particles | GPU time (ms/update) | Throughput (M updates/s) | RMSE |
 |---:|---:|---:|---:|
-| 1,024 | 0.1424 | 7.19 | 0.0657 |
-| 4,096 | 0.1436 | 28.53 | 0.0651 |
-| 16,384 | 0.1779 | 92.07 | 0.0651 |
-| 65,536 | 0.2326 | 281.75 | 0.0654 |
-| 262,144 | 0.5143 | 509.67 | 0.0653 |
-| 1,048,576 | 1.4922 | 702.73 | 0.0653 |
-| 4,194,304 | 6.4407 | 651.22 | 0.0617 |
-| 8,388,608 | 13.1418 | 638.31 | 0.0618 |
-| 16,777,216 | 26.3561 | 636.56 | 0.0618 |
-| 33,554,432 | 54.4175 | 616.61 | 0.0814 |
+| 1,024 | 0.0351 | 29.19 | 0.0644 |
+| 4,096 | 0.0348 | 117.73 | 0.0648 |
+| 16,384 | 0.0339 | 482.88 | 0.0641 |
+| 65,536 | 0.0412 | 1589.51 | 0.0638 |
+| 262,144 | 0.0720 | 3639.40 | 0.0638 |
+| 1,048,576 | 0.1603 | 6539.97 | 0.0638 |
+| 4,194,304 | 0.6290 | 6668.69 | 0.0738 |
+| 8,388,608 | 1.2609 | 6652.94 | 0.0738 |
+| 16,777,216 | 2.6105 | 6426.89 | 0.0739 |
+| 33,554,432 | 5.2019 | 6450.39 | 0.0943 |
+| 67,108,864 | 10.4365 | 6430.22 | 0.0944 |
+| 134,217,728 | 20.9798 | 6397.49 | 0.0944 |
+| 268,435,456 | 42.2880 | 6347.79 | 0.0944 |
 
-The GPU results were recorded on an RTX 4050 Laptop GPU with 20 SMs, 6.0 GB of memory, and compute capability 8.9. RMSE is the root mean squared Euclidean position error over timed updates. Full output, including CPU timing reference results, is in [`results.txt`](results.txt); the CPU implementation is used only for benchmarking.
+The GPU results were recorded on an RTX 5090 with 170 SMs, 33.8 GB of memory, and compute capability 12.0. RMSE is the root mean squared Euclidean position error over timed updates. Full output, including CPU timing reference results, is in [`resultsdesktop5090.txt`](resultsdesktop5090.txt); the CPU implementation is used only for benchmarking.
 
 ## Build status
 
@@ -37,7 +40,7 @@ The source requires the CUDA runtime, cuRAND headers, a CUDA-capable C++ compile
 
 - [`main.cu`](main.cu) — program entry point, simulation setup, and result reporting.
 - [`particle_filter.cuh`](particle_filter.cuh) — CUDA kernels and particle-filter orchestration.
-- [`results.txt`](results.txt) — recorded benchmark output.
+- [`resultsdesktop5090.txt`](resultsdesktop5090.txt) — recorded benchmark output.
 
 ## Technical details
 
